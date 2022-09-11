@@ -5,15 +5,15 @@ require('console.table');
 connection.connect(err => {
     if(err) throw err;
     console.log('Connected.');
-    updateEmployee();
+    // updateEmployee();
 });
 
 //updates the employee information
 var updateEmployee = () => {
-    inquirer.prompt([
-        {
-            type: 'list',
+    inquirer.prompt(
+        { 
             name: 'empChoice',
+            type: 'list',
             message: 'Please make your selection:',
             choices: [
                 'View all employees',
@@ -26,7 +26,7 @@ var updateEmployee = () => {
                 'Quit'
             ]
         }
-    ]) //once the choice is selected, run the function 
+    ) //once the choice is selected, run the function 
     .then(answer => { //according to the the case of that choice
         switch (answer.empChoice){
             case 'View all employees':
@@ -50,6 +50,8 @@ var updateEmployee = () => {
             case 'Update an employee role':
                 updateEmpRole();
                 break;
+            case 'Quit':
+                quitConnection();
         }
     });
 };
@@ -135,15 +137,15 @@ const addDept = () => {
             name: 'newDept'
         }
     ])
-    .then((answers) => {
+    .then(({ newDept }) => {
         connection.query(`INSERT INTO department SET ?`,
         {
-            name: answers.newDept
+            name: newDept
         },
         (err) => {
             if(err) throw err;
             console.log('The department has been added.');
-            console.table(answers);
+            console.table({ newDept });
             updateEmployee();
         })
     })
@@ -151,6 +153,7 @@ const addDept = () => {
 
 //adds roles
 const addRole = () => {
+    connection.query(`SELECT * FROM department`, (err, res) => {  
     inquirer.prompt([
         {
             type: 'input',
@@ -161,23 +164,29 @@ const addRole = () => {
             type: 'input',
             message: 'Please enter the salary for this role:',
             name: 'salary'
+        },
+        {
+            type: 'list',
+            message: 'Which department is this role in?',
+            name: 'deptChoice',
+            choices: res.map((department) => department.name)
         }
     ])
-    .then((answers) => {
-        connection.query(`INSERT INTO role SET ?`,
-        {
-            title: answers.newRole,
-            salary: answers.salary
-        },
-        (err) => {
-            if(err) throw err;
-            console.log('The new role has been added.');
-            console.table(answers);
-            updateEmployee();
+    .then(({newRole, salary, deptChoice}) => {
+        res.map(userRes => {
+            if(userRes.name === deptChoice){
+                let newDeptId = userRes.id;
+                connection.query(`INSERT INTO role SET ?`,
+                {
+                    title: newRole,
+                    salary: salary,
+                    department_id: newDeptId
+                });
+            }
         })
-    })
-};
-
+    updateEmployee();
+    });
+});
 //pushes data into the empty employees array
 employeeArr = [];
     const query = 'SELECT first_name FROM employee';
@@ -221,11 +230,14 @@ const updateEmpRole = () => {
         },
         (err) => {
             if(err) throw err;
+            updateEmpRole();
             console.log("The employee's role has been updated.");
             console.table(answers);
             updateEmployee();
-        });
-    });
-};
+        })
+    })
+}
 
+}
+const quitConnection = () => connection.end();
 updateEmployee();
