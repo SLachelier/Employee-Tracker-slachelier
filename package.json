@@ -21,5 +21,6 @@
   "bugs": {
     "url": "https://github.com/SLachelier/Employee-Tracker-slachelier/issues"
   },
-  "homepage": "https://github.com/SLachelier/Employee-Tracker-slachelier#readme"
+  "homepage": "https://github.com/SLachelier/Employee-Tracker-slachelier#readme",
+  "devDependencies": {}
 }

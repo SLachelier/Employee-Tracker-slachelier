@@ -56,7 +56,7 @@ var updateEmployee = () => {
 
 //views all of the employees
 const viewEmployees = () => {
-    const query = `SELECT * FROM employee`;
+    const query = `SELECT * FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id`;
     connection.query(query, (err, res) => {
         if(err) throw err;
         console.log('Viewing all of the employees:');
@@ -67,7 +67,7 @@ const viewEmployees = () => {
 
 //views all of the departments
 const viewDepts = () => {
-    const query = `SELECT name FROM department`;
+    const query = `SELECT * FROM department`;
     connection.query(query, (err, res) => {
         if(err) throw err;
         console.log('Viewing all of the departments:');
@@ -79,7 +79,7 @@ const viewDepts = () => {
 //views all of the roles
 const viewRoles = () => {
     rolesArr = [];
-    const query = `SELECT title FROM role`;
+    const query = `SELECT * FROM role`;
     connection.query(query, (err, res) => {
         if (err) throw err;
         res.forEach(({title}) => {
@@ -109,19 +109,13 @@ const addEmployee = () => {
         type: 'input',
         message: "Employee's role ID:",
         name: 'roleId'
-        },
-        {
-        type: 'input',
-        message: "Employee's manager ID:",
-        name: 'managersId'
         }
     ]).then((answers)=>{
         connection.query(`INSERT INTO employee SET ?`,
         {
         first_name: answers.firstName,
         last_name: answers.lastName,
-        role_id: answers.roleId,
-        manager_id: answers.managersId
+        role_id: answers.roleId
         },
         (err) => {
             if (err) throw err;
